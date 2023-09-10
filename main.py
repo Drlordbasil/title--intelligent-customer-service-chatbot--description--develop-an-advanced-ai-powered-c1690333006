@@ -1,10 +1,18 @@
+from nltk.stem.lancaster import LancasterStemmer
+import pickle
+import json
+import random
+import tflearn
+import tensorflow as tf
+import numpy as np
+import nltk
 Here are some improvements to the Python program:
 
 1. Use meaningful and descriptive variable names: Replace generic variable names like `w`, `data`, `bag`, `net`, etc. with more descriptive names to enhance code readability.
 
 2. Divide code into functions: Split the code into smaller functions to improve modularity and make the code more organized and maintainable.
 
-3. Use context managers for file operations: Use the `with` statement as a context manager for file operations to ensure proper handling of resources and avoid memory leaks.
+3. Use context managers for file operations: Use the `with ` statement as a context manager for file operations to ensure proper handling of resources and avoid memory leaks.
 
 4. Use list comprehensions: Simplify the code by using list comprehensions wherever applicable, instead of using traditional loops.
 
@@ -13,22 +21,16 @@ Here are some improvements to the Python program:
 Here's the improved code:
 
 ```python
-import nltk
-import numpy as np
-import tensorflow as tf
-import tflearn
-import random
-import json
-import pickle
 
-from nltk.stem.lancaster import LancasterStemmer
 
 stemmer = LancasterStemmer()
+
 
 def load_intents(filename):
     with open(filename) as file:
         data = json.load(file)
     return data
+
 
 def tokenize_patterns(data, ignore_words):
     words = []
@@ -45,8 +47,9 @@ def tokenize_patterns(data, ignore_words):
     words = [stemmer.stem(w.lower()) for w in words if w not in ignore_words]
     words = sorted(list(set(words)))
     classes = sorted(list(set(classes)))
-    
+
     return words, classes, documents
+
 
 def create_training_data(documents, words, classes):
     training = []
@@ -57,7 +60,7 @@ def create_training_data(documents, words, classes):
         output_row = list(output_empty)
         output_row[classes.index(doc[1])] = 1
         training.append([bag, output_row])
-    
+
     random.shuffle(training)
     training = np.array(training)
 
@@ -65,6 +68,7 @@ def create_training_data(documents, words, classes):
     train_y = list(training[:, 1])
 
     return train_x, train_y
+
 
 def build_neural_network(train_x, train_y):
     tf.compat.v1.reset_default_graph()
@@ -78,10 +82,13 @@ def build_neural_network(train_x, train_y):
     model.fit(train_x, train_y, n_epoch=1000, batch_size=8, show_metric=True)
     model.save('model.tflearn')
 
+
 def save_training_data(words, classes, train_x, train_y, filename):
-    data = {'words': words, 'classes': classes, 'train_x': train_x, 'train_y': train_y}
+    data = {'words': words, 'classes': classes,
+            'train_x': train_x, 'train_y': train_y}
     with open(filename, 'wb') as file:
         pickle.dump(data, file)
+
 
 if __name__ == '__main__':
     ignore_words = ['?', '!']
